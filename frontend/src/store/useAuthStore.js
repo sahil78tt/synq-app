@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { connectSocket, disconnectSocket } from "../lib/socket";
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
   isLoading: false,
@@ -56,6 +56,25 @@ export const useAuthStore = create((set) => ({
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || "Signup failed.";
+      set({ isLoading: false, error: message });
+      return { success: false, message };
+    }
+  },
+
+  updateProfile: async (payload) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const { data } = await axiosInstance.put("/auth/update-profile", payload);
+
+      set({
+        authUser: data,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || "Profile update failed.";
       set({ isLoading: false, error: message });
       return { success: false, message };
     }

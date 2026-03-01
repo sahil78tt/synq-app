@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use("/api/auth", authroutes);
 app.use("/api/message", messageroutes);
 
-// Start server
+//  server
 server.listen(process.env.PORT || 5000, () => {
   console.log(
     `🚀 Server running on http://localhost:${process.env.PORT || 5000}`,
