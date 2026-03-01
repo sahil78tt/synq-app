@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
+import { socket } from "../lib/socket";
 
 export const useChatStore = create((set, get) => ({
   selectedChat: null,
@@ -22,6 +23,20 @@ export const useChatStore = create((set, get) => ({
       set({ isLoadingConversations: true });
       const { data } = await axiosInstance.get("/message/users");
       set({ conversations: data, isLoadingConversations: false });
+
+      // 🔥 listen profile updates for sidebar users
+      socket.on("profileUpdated", (updatedUser) => {
+        const updatedList = get().conversations.map((user) =>
+          user._id === updatedUser._id ? updatedUser : user,
+        );
+
+        set({ conversations: updatedList });
+
+        const current = get().selectedChat;
+        if (current && current._id === updatedUser._id) {
+          set({ selectedChat: updatedUser });
+        }
+      });
     } catch (error) {
       set({ isLoadingConversations: false });
     }
@@ -69,7 +84,6 @@ export const useChatStore = create((set, get) => ({
 
     if (!belongsToCurrentChat) return;
 
-    // 🔥 prevent duplicate
     const exists = messages.some((msg) => msg._id === message._id);
     if (exists) return;
 

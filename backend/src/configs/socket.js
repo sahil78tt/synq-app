@@ -18,6 +18,10 @@ export const getReceiverSocketId = (receiverId) => {
   return userSocketMap[receiverId];
 };
 
+export const emitProfileUpdate = (updatedUser) => {
+  io.emit("profileUpdated", updatedUser);
+};
+
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
@@ -27,7 +31,6 @@ io.on("connection", (socket) => {
     userSocketMap[userId] = socket.id;
   }
 
-  // send online users list
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("disconnect", () => {

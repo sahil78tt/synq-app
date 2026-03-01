@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
-import { connectSocket, disconnectSocket } from "../lib/socket";
+import { connectSocket, disconnectSocket, socket } from "../lib/socket";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -15,6 +15,14 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: data, isCheckingAuth: false });
 
       connectSocket(data._id);
+
+      // 🔥 listen profile update
+      socket.on("profileUpdated", (updatedUser) => {
+        const current = get().authUser;
+        if (current && current._id === updatedUser._id) {
+          set({ authUser: updatedUser });
+        }
+      });
     } catch {
       localStorage.removeItem("synq_token");
       set({ authUser: null, isCheckingAuth: false });

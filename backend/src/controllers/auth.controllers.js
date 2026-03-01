@@ -2,6 +2,7 @@ import cloudinary from "../configs/cloudinary.js";
 import { generateToken } from "../configs/utils.js";
 import User from "../models/users.models.js";
 import bcrypt from "bcryptjs";
+import { emitProfileUpdate } from "../configs/socket.js";
 
 export const checkAuth = async (req, res) => {
   res.status(200).json(req.user);
@@ -93,18 +94,15 @@ export const updateProfile = async (req, res) => {
 
     const updateData = {};
 
-    // Update name if provided
     if (fullName && fullName.trim()) {
       updateData.fullName = fullName.trim();
     }
 
-    // Update profile picture only if provided
     if (profilePic) {
       const upload = await cloudinary.uploader.upload(profilePic);
       updateData.profilePic = upload.secure_url;
     }
 
-    // If nothing to update
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ message: "No data to update" });
     }
@@ -112,6 +110,9 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     }).select("-password");
+
+    // 🔥 NEW: emit realtime profile update
+    emitProfileUpdate(updatedUser);
 
     res.status(200).json(updatedUser);
   } catch (error) {
