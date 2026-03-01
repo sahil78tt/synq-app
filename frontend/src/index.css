@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   Root Layout Fix
+========================= */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden; /* sirf horizontal hide */
+  overflow-y: auto; /* vertical scroll allow */
+}
+
+/* =========================
+   Base Layer
+========================= */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: "DM Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface text-charcoal;
+  }
+
+  .dark body {
+    @apply bg-surface-dark text-[#f0f0ee];
+  }
+
+  /* Global Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-border-dark;
+  }
+
+  ::selection {
+    @apply bg-accent/20 text-charcoal;
+  }
+}
+
+/* =========================
+   Components
+========================= */
+
+@layer components {
+  .message-enter {
+    animation: messageIn 0.2s ease-out forwards;
+  }
+}
+
+/* =========================
+   Animations
+========================= */
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
