@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
-import { socket } from "../lib/socket";
 
 export const useChatStore = create((set, get) => ({
   selectedChat: null,
@@ -62,13 +61,19 @@ export const useChatStore = create((set, get) => ({
   addMessage: (message) => {
     const { selectedChat, messages } = get();
 
-    if (
-      selectedChat &&
-      (message.senderId === selectedChat._id ||
-        message.receiverId === selectedChat._id)
-    ) {
-      set({ messages: [...messages, message] });
-    }
+    if (!selectedChat) return;
+
+    const belongsToCurrentChat =
+      message.senderId === selectedChat._id ||
+      message.receiverId === selectedChat._id;
+
+    if (!belongsToCurrentChat) return;
+
+    // 🔥 prevent duplicate
+    const exists = messages.some((msg) => msg._id === message._id);
+    if (exists) return;
+
+    set({ messages: [...messages, message] });
   },
 
   setOnlineUsers: (users) => {

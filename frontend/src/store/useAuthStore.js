@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
+import { connectSocket, disconnectSocket } from "../lib/socket";
 
 export const useAuthStore = create((set) => ({
   authUser: null,
@@ -10,7 +11,10 @@ export const useAuthStore = create((set) => ({
   checkAuth: async () => {
     try {
       const { data } = await axiosInstance.get("/auth/me");
+
       set({ authUser: data, isCheckingAuth: false });
+
+      connectSocket(data._id);
     } catch {
       localStorage.removeItem("synq_token");
       set({ authUser: null, isCheckingAuth: false });
@@ -19,10 +23,16 @@ export const useAuthStore = create((set) => ({
 
   login: async (credentials) => {
     set({ isLoading: true, error: null });
+
     try {
       const { data } = await axiosInstance.post("/auth/login", credentials);
+
       localStorage.setItem("synq_token", data.token);
+
       set({ authUser: data.user, isLoading: false });
+
+      connectSocket(data.user._id);
+
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || "Login failed.";
@@ -33,10 +43,16 @@ export const useAuthStore = create((set) => ({
 
   signup: async (payload) => {
     set({ isLoading: true, error: null });
+
     try {
       const { data } = await axiosInstance.post("/auth/signup", payload);
+
       localStorage.setItem("synq_token", data.token);
+
       set({ authUser: data.user, isLoading: false });
+
+      connectSocket(data.user._id);
+
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || "Signup failed.";
@@ -45,24 +61,8 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  // 🔥 ADD THIS FUNCTION
-  updateProfile: async (payload) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { data } = await axiosInstance.put("/auth/update-profile", payload);
-
-      // assuming backend returns updated user
-      set({ authUser: data, isLoading: false });
-
-      return { success: true };
-    } catch (err) {
-      const message = err.response?.data?.message || "Update failed.";
-      set({ isLoading: false, error: message });
-      return { success: false, message };
-    }
-  },
-
   logout: () => {
+    disconnectSocket();
     localStorage.removeItem("synq_token");
     set({ authUser: null });
   },

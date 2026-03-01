@@ -7,6 +7,8 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import { socket } from "./lib/socket";
+import { useChatStore } from "./store/useChatStore";
 
 function ProtectedRoute({ children }) {
   const authUser = useAuthStore((state) => state.authUser);
@@ -41,6 +43,17 @@ function GuestRoute({ children }) {
 export default function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const theme = useThemeStore((state) => state.theme);
+  useEffect(() => {
+    const handleOnlineUsers = (users) => {
+      useChatStore.getState().setOnlineUsers(users);
+    };
+
+    socket.on("getOnlineUsers", handleOnlineUsers);
+
+    return () => {
+      socket.off("getOnlineUsers", handleOnlineUsers);
+    };
+  }, []);
 
   useEffect(() => {
     checkAuth();

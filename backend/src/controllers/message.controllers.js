@@ -37,28 +37,26 @@ export const getMessages = async (req, res) => {
   }
 };
 
-export const sendMessages = async (req, res) => {
+export const sendMessage = async (req, res) => {
   try {
     const { text, image } = req.body;
-    const { id: receiverId } = req.params;
+    const receiverId = req.params.id;
     const senderId = req.user._id;
 
-    let imageUrl;
-
-    if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
+    if (!receiverId) {
+      return res.status(400).json({ message: "Receiver ID missing" });
     }
 
     const newMessage = new Message({
       senderId,
       receiverId,
       text,
-      image: imageUrl,
+      image,
     });
 
     await newMessage.save();
 
+    // 🔥 REALTIME PART
     const receiverSocketId = getReceiverSocketId(receiverId);
 
     if (receiverSocketId) {
@@ -67,7 +65,7 @@ export const sendMessages = async (req, res) => {
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sendMessages:", error.message);
+    console.log("Error in sendMessage:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
