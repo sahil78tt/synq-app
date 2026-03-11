@@ -12,7 +12,8 @@ export default function Navbar() {
 
   useEffect(() => {
     function handler(e) {
-      if (dropRef.current && !dropRef.current.contains(e.target)) setOpen(false);
+      if (dropRef.current && !dropRef.current.contains(e.target))
+        setOpen(false);
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -27,9 +28,15 @@ export default function Navbar() {
     <header className="h-14 bg-panel dark:bg-panel-dark border-b border-border dark:border-border-dark flex items-center px-5 justify-between shrink-0 z-20">
       <Link
         to="/"
-        className="font-display text-lg text-charcoal dark:text-[#f0f0ee] tracking-tight select-none"
+        className="flex items-center -ml-3  gap-2 font-display text-lg text-charcoal dark:text-[#f0f0ee] tracking-tight select-none"
       >
-        SynQ
+        <img
+          src="/SynQ-Logo.png"
+          alt="SynQ Logo"
+          className="w-12 h-12  object-contain"
+          draggable="false"
+        />
+        <span>SynQ</span>
       </Link>
 
       <div className="flex items-center gap-3">
@@ -55,9 +62,7 @@ export default function Navbar() {
                   e.currentTarget.nextSibling.style.display = "flex";
                 }}
               />
-              <span
-                className="hidden w-7 h-7 rounded-full bg-accent/10 text-accent text-[10px] font-medium items-center justify-center"
-              >
+              <span className="hidden w-7 h-7 rounded-full bg-accent/10 text-accent text-[10px] font-medium items-center justify-center">
                 {getInitials(authUser.fullName)}
               </span>
               <span className="text-sm text-charcoal dark:text-[#f0f0ee] hidden sm:block max-w-[100px] truncate">
@@ -81,7 +86,13 @@ export default function Navbar() {
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-charcoal dark:text-[#f0f0ee] hover:bg-surface dark:hover:bg-surface-dark/50 transition-colors duration-200"
                 >
-                  <svg className="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg
+                    className="w-4 h-4 text-muted"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
                     <circle cx="12" cy="8" r="4" />
                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
                   </svg>
@@ -92,7 +103,13 @@ export default function Navbar() {
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted dark:text-muted-dark hover:text-charcoal dark:hover:text-[#f0f0ee] hover:bg-surface dark:hover:bg-surface-dark/50 transition-colors duration-200"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
                     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
                   </svg>
                   Sign out

@@ -57,17 +57,12 @@ const Message = memo(function Message({
 });
 
 export default function ChatContainer() {
-  const {
-    messages,
-    isLoadingMessages,
-    selectedChat,
-    addMessage, // ⚠️ make sure this exists in your store
-  } = useChatStore();
+  const { messages, isLoadingMessages, selectedChat, addMessage } =
+    useChatStore();
 
   const { authUser } = useAuthStore();
   const bottomRef = useRef(null);
 
-  // 🔥 Realtime Listener
   useEffect(() => {
     if (!selectedChat) return;
 
@@ -82,7 +77,6 @@ export default function ChatContainer() {
     };
   }, [selectedChat]);
 
-  // Auto scroll on new messages
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });

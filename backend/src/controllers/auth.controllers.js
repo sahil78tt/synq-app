@@ -111,7 +111,6 @@ export const updateProfile = async (req, res) => {
       new: true,
     }).select("-password");
 
-    // 🔥 NEW: emit realtime profile update
     emitProfileUpdate(updatedUser);
 
     res.status(200).json(updatedUser);

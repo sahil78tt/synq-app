@@ -57,7 +57,7 @@ export default function App() {
 
   useEffect(() => {
     checkAuth();
-  }, []); // 🚨 IMPORTANT: empty dependency
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

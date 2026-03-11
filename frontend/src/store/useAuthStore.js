@@ -16,7 +16,6 @@ export const useAuthStore = create((set, get) => ({
 
       connectSocket(data._id);
 
-      // 🔥 listen profile update
       socket.on("profileUpdated", (updatedUser) => {
         const current = get().authUser;
         if (current && current._id === updatedUser._id) {

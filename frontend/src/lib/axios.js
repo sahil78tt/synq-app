@@ -7,7 +7,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// Add token automatically
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("synq_token");
   if (token) {
@@ -16,7 +15,6 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// ❌ REMOVE window.location.href redirect
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -56,7 +56,6 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
-    // 🔥 REALTIME PART
     const receiverSocketId = getReceiverSocketId(receiverId);
 
     if (receiverSocketId) {

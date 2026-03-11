@@ -71,7 +71,6 @@ export default function Sidebar() {
     fetchConversations();
   }, []);
 
-  // 🔥 Inject online status
   const filtered = conversations
     .map((user) => ({
       ...user,

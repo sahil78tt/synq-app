@@ -24,7 +24,6 @@ export const useChatStore = create((set, get) => ({
       const { data } = await axiosInstance.get("/message/users");
       set({ conversations: data, isLoadingConversations: false });
 
-      // 🔥 listen profile updates for sidebar users
       socket.on("profileUpdated", (updatedUser) => {
         const updatedList = get().conversations.map((user) =>
           user._id === updatedUser._id ? updatedUser : user,

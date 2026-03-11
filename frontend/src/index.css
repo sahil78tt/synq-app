@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =========================
-   Root Layout Fix
-========================= */
-
 html,
 body,
 #root {
@@ -14,13 +10,9 @@ body,
 
 body {
   margin: 0;
-  overflow-x: hidden; /* sirf horizontal hide */
-  overflow-y: auto; /* vertical scroll allow */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-
-/* =========================
-   Base Layer
-========================= */
 
 @layer base {
   * {
@@ -64,19 +56,11 @@ body {
   }
 }
 
-/* =========================
-   Components
-========================= */
-
 @layer components {
   .message-enter {
     animation: messageIn 0.2s ease-out forwards;
   }
 }
-
-/* =========================
-   Animations
-========================= */
 
 @keyframes messageIn {
   from {
