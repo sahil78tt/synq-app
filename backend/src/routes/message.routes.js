@@ -4,10 +4,14 @@ import {
   getUsersforsidebar,
   getMessages,
   sendMessage,
+  summarizeConversation,
 } from "../controllers/message.controllers.js";
+
 const router = express.Router();
 
 router.get("/users", isAuthorized, getUsersforsidebar);
 router.get("/messages/:id", isAuthorized, getMessages);
 router.post("/messages/send/:id", isAuthorized, sendMessage);
+router.post("/summarize/:id", isAuthorized, summarizeConversation);
+
 export default router;

@@ -3,7 +3,8 @@ import { getInitials } from "../lib/utils";
 import { DEFAULT_AVATAR } from "../constants";
 
 export default function ChatHeader() {
-  const { selectedChat, setSelectedChat } = useChatStore();
+  const { selectedChat, setSelectedChat, fetchSummary, isSummarizing } =
+    useChatStore();
 
   if (!selectedChat) return null;
 
@@ -14,7 +15,13 @@ export default function ChatHeader() {
         className="sm:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-charcoal dark:hover:text-[#f0f0ee] hover:bg-surface dark:hover:bg-surface-dark/50 transition-colors duration-200"
         aria-label="Back"
       >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
@@ -48,6 +55,36 @@ export default function ChatHeader() {
           {selectedChat.isOnline ? "Active now" : "Offline"}
         </p>
       </div>
+
+      <button
+        onClick={fetchSummary}
+        disabled={isSummarizing}
+        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent/10 hover:bg-accent/20 text-accent dark:bg-accent/20 dark:hover:bg-accent/30 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+      >
+        {isSummarizing ? (
+          <>
+            <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+            <span>Summarizing...</span>
+          </>
+        ) : (
+          <>
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span>Summarize</span>
+          </>
+        )}
+      </button>
     </div>
   );
 }

@@ -10,9 +10,11 @@ export const useChatStore = create((set, get) => ({
   isLoadingMessages: false,
   isLoadingConversations: false,
   isSending: false,
+  summary: null,
+  isSummarizing: false,
 
   setSelectedChat: async (chat) => {
-    set({ selectedChat: chat, messages: [] });
+    set({ selectedChat: chat, messages: [], summary: null }); // Reset summary on chat change
     if (chat) {
       await get().fetchMessages(chat._id);
     }
@@ -91,5 +93,20 @@ export const useChatStore = create((set, get) => ({
 
   setOnlineUsers: (users) => {
     set({ onlineUsers: users });
+  },
+
+  fetchSummary: async () => {
+    const { selectedChat } = get();
+    if (!selectedChat) return;
+
+    try {
+      set({ isSummarizing: true });
+      const { data } = await axiosInstance.post(
+        `/message/summarize/${selectedChat._id}`,
+      );
+      set({ summary: data.summary, isSummarizing: false });
+    } catch (error) {
+      set({ isSummarizing: false, summary: null });
+    }
   },
 }));

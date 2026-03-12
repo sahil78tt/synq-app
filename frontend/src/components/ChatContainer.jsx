@@ -7,6 +7,7 @@ import { DEFAULT_AVATAR } from "../constants";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
+import ConversationSummary from "./ConversationSummary";
 
 const Message = memo(function Message({
   message,
@@ -75,7 +76,7 @@ export default function ChatContainer() {
     return () => {
       socket.off("newMessage", handleNewMessage);
     };
-  }, [selectedChat]);
+  }, [selectedChat, addMessage]);
 
   useEffect(() => {
     if (bottomRef.current) {
@@ -86,6 +87,8 @@ export default function ChatContainer() {
   return (
     <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-surface dark:bg-surface-dark">
       <ChatHeader />
+
+      <ConversationSummary />
 
       <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
         {isLoadingMessages ? (
