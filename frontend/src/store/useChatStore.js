@@ -12,9 +12,18 @@ export const useChatStore = create((set, get) => ({
   isSending: false,
   summary: null,
   isSummarizing: false,
+  searchQuery: "",
+  searchResults: [],
+  isSearching: false,
 
   setSelectedChat: async (chat) => {
-    set({ selectedChat: chat, messages: [], summary: null }); // Reset summary on chat change
+    set({
+      selectedChat: chat,
+      messages: [],
+      summary: null,
+      searchQuery: "",
+      searchResults: [],
+    });
     if (chat) {
       await get().fetchMessages(chat._id);
     }
@@ -108,5 +117,35 @@ export const useChatStore = create((set, get) => ({
     } catch (error) {
       set({ isSummarizing: false, summary: null });
     }
+  },
+
+  setSearchQuery: (query) => {
+    set({ searchQuery: query });
+    if (!query || query.trim() === "") {
+      set({ searchResults: [] });
+    }
+  },
+
+  semanticSearch: async (query) => {
+    const { selectedChat } = get();
+    if (!selectedChat || !query || query.trim() === "") {
+      set({ searchResults: [], searchQuery: "" });
+      return;
+    }
+
+    try {
+      set({ isSearching: true, searchQuery: query });
+      const { data } = await axiosInstance.get(
+        `/message/semantic-search/${selectedChat._id}?q=${encodeURIComponent(query)}`,
+      );
+      set({ searchResults: data.results || [], isSearching: false });
+    } catch (error) {
+      console.error("Semantic search error:", error);
+      set({ isSearching: false, searchResults: [] });
+    }
+  },
+
+  clearSearch: () => {
+    set({ searchQuery: "", searchResults: [] });
   },
 }));

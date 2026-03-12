@@ -14,10 +14,11 @@ const Message = memo(function Message({
   isMine,
   senderAvatar,
   senderName,
+  isSearchResult,
 }) {
   return (
     <div
-      className={`flex gap-2.5 items-end message-enter ${isMine ? "flex-row-reverse" : "flex-row"}`}
+      className={`flex gap-2.5 items-end message-enter ${isMine ? "flex-row-reverse" : "flex-row"} ${isSearchResult ? "opacity-90" : ""}`}
     >
       {!isMine && (
         <img
@@ -44,7 +45,8 @@ const Message = memo(function Message({
                 isMine
                   ? "bg-charcoal dark:bg-[#f0f0ee] text-panel dark:text-charcoal rounded-br-sm"
                   : "bg-panel dark:bg-panel-dark text-charcoal dark:text-[#f0f0ee] border border-border dark:border-border-dark rounded-bl-sm"
-              }`}
+              }
+              ${isSearchResult ? "ring-2 ring-accent/30" : ""}`}
           >
             {message.text}
           </div>
@@ -58,8 +60,15 @@ const Message = memo(function Message({
 });
 
 export default function ChatContainer() {
-  const { messages, isLoadingMessages, selectedChat, addMessage } =
-    useChatStore();
+  const {
+    messages,
+    isLoadingMessages,
+    selectedChat,
+    addMessage,
+    searchResults,
+    searchQuery,
+    isSearching,
+  } = useChatStore();
 
   const { authUser } = useAuthStore();
   const bottomRef = useRef(null);
@@ -79,10 +88,12 @@ export default function ChatContainer() {
   }, [selectedChat, addMessage]);
 
   useEffect(() => {
-    if (bottomRef.current) {
+    if (bottomRef.current && !searchQuery) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, searchQuery]);
+
+  const hasSearchResults = searchResults && searchResults.length > 0;
 
   return (
     <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-surface dark:bg-surface-dark">
@@ -90,6 +101,60 @@ export default function ChatContainer() {
 
       <ConversationSummary />
 
+      {/* Search Results Section */}
+      {searchQuery && (
+        <div className="px-5 py-3 border-b border-border dark:border-border-dark bg-accent/5 dark:bg-accent/10">
+          <div className="flex items-center gap-2 mb-2">
+            <svg
+              className="w-4 h-4 text-accent"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <h3 className="text-xs font-semibold text-charcoal dark:text-[#f0f0ee] uppercase tracking-wide">
+              Search Results
+              {!isSearching && hasSearchResults && (
+                <span className="ml-2 text-muted dark:text-muted-dark font-normal">
+                  ({searchResults.length} found)
+                </span>
+              )}
+            </h3>
+          </div>
+
+          {isSearching ? (
+            <div className="flex items-center gap-2 text-sm text-muted dark:text-muted-dark py-4">
+              <div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+              <span>Searching by meaning...</span>
+            </div>
+          ) : hasSearchResults ? (
+            <div className="flex flex-col gap-3 max-h-60 overflow-y-auto">
+              {searchResults.map((msg) => (
+                <Message
+                  key={msg._id}
+                  message={msg}
+                  isMine={msg.senderId === authUser?._id}
+                  senderAvatar={selectedChat?.profilePic}
+                  senderName={selectedChat?.fullName}
+                  isSearchResult={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted dark:text-muted-dark py-2">
+              No messages found matching "{searchQuery}"
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Regular Messages Section */}
       <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
         {isLoadingMessages ? (
           <MessageSkeleton />
@@ -107,6 +172,7 @@ export default function ChatContainer() {
               isMine={msg.senderId === authUser?._id}
               senderAvatar={selectedChat?.profilePic}
               senderName={selectedChat?.fullName}
+              isSearchResult={false}
             />
           ))
         )}
