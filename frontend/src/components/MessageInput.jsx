@@ -1,16 +1,85 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { socket } from "../lib/socket";
 import { MESSAGE_MAX_LENGTH } from "../constants";
 
 export default function MessageInput() {
-  const { sendMessage, isSending } = useChatStore();
+  const { sendMessage, isSending, selectedChat } = useChatStore();
+  const { authUser } = useAuthStore();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const isTypingRef = useRef(false);
+
+  const stopTypingEmit = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    if (isTypingRef.current && selectedChat && authUser) {
+      socket.emit("stopTyping", {
+        senderId: authUser._id,
+        receiverId: selectedChat._id,
+      });
+      isTypingRef.current = false;
+    }
+  }, [selectedChat, authUser]);
+
+  useEffect(() => {
+    return () => {
+      stopTypingEmit();
+    };
+  }, [stopTypingEmit]);
+
+  useEffect(() => {
+    isTypingRef.current = false;
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  }, [selectedChat?._id]);
+
+  const handleTextChange = (e) => {
+    const value = e.target.value.slice(0, MESSAGE_MAX_LENGTH);
+    setText(value);
+
+    if (!selectedChat || !authUser) return;
+
+    if (value.length > 0) {
+      if (!isTypingRef.current) {
+        socket.emit("typing", {
+          senderId: authUser._id,
+          receiverId: selectedChat._id,
+        });
+        isTypingRef.current = true;
+      }
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        if (selectedChat && authUser && isTypingRef.current) {
+          socket.emit("stopTyping", {
+            senderId: authUser._id,
+            receiverId: selectedChat._id,
+          });
+          isTypingRef.current = false;
+        }
+      }, 2000);
+    } else {
+      stopTypingEmit();
+    }
+  };
 
   const handleSend = async () => {
     const trimmed = text.trim();
     if (!trimmed && !imagePreview) return;
+
+    stopTypingEmit();
 
     await sendMessage({
       text: trimmed,
@@ -28,6 +97,10 @@ export default function MessageInput() {
     }
   };
 
+  const handleBlur = () => {
+    stopTypingEmit();
+  };
+
   const handleFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -41,7 +114,6 @@ export default function MessageInput() {
 
   return (
     <div className="w-full px-4 py-3 border-t border-border dark:border-border-dark bg-panel dark:bg-panel-dark shrink-0">
-      {/* Image Preview */}
       {imagePreview && (
         <div className="mb-3 relative inline-block">
           <img
@@ -52,25 +124,23 @@ export default function MessageInput() {
           <button
             onClick={() => setImagePreview(null)}
             className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
-            bg-charcoal dark:bg-[#f0f0ee] 
-            text-panel dark:text-charcoal 
-            flex items-center justify-center text-xs shadow-md"
+              bg-charcoal dark:bg-[#f0f0ee] 
+              text-panel dark:text-charcoal 
+              flex items-center justify-center text-xs shadow-md"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* Input Row */}
       <div className="flex items-end gap-3">
-        {/* Image Button */}
         <button
           onClick={() => fileRef.current?.click()}
           className="w-10 h-10 rounded-xl flex items-center justify-center 
-          text-muted dark:text-muted-dark 
-          hover:text-charcoal dark:hover:text-[#f0f0ee] 
-          hover:bg-surface dark:hover:bg-surface-dark/50 
-          transition-all duration-200 shrink-0"
+            text-muted dark:text-muted-dark 
+            hover:text-charcoal dark:hover:text-[#f0f0ee] 
+            hover:bg-surface dark:hover:bg-surface-dark/50 
+            transition-all duration-200 shrink-0"
           aria-label="Attach image"
         >
           <svg
@@ -94,22 +164,22 @@ export default function MessageInput() {
           onChange={handleFile}
         />
 
-        {/* Textarea */}
         <textarea
           value={text}
-          onChange={(e) => setText(e.target.value.slice(0, MESSAGE_MAX_LENGTH))}
+          onChange={handleTextChange}
           onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
           placeholder="Write a message…"
           rows={1}
           className="flex-1 resize-none 
-  bg-surface dark:bg-surface-dark/50 
-  border border-border dark:border-border-dark 
-  rounded-2xl px-4 py-2.5 text-sm 
-  text-charcoal dark:text-[#f0f0ee] 
-  placeholder:text-muted dark:placeholder:text-muted-dark 
-  outline-none focus:ring-2 focus:ring-accent/20 
-  transition-all duration-200 
-  max-h-32 overflow-hidden leading-relaxed"
+            bg-surface dark:bg-surface-dark/50 
+            border border-border dark:border-border-dark 
+            rounded-2xl px-4 py-2.5 text-sm 
+            text-charcoal dark:text-[#f0f0ee] 
+            placeholder:text-muted dark:placeholder:text-muted-dark 
+            outline-none focus:ring-2 focus:ring-accent/20 
+            transition-all duration-200 
+            max-h-32 overflow-hidden leading-relaxed"
           style={{ height: "44px" }}
           onInput={(e) => {
             e.target.style.height = "44px";
@@ -117,16 +187,15 @@ export default function MessageInput() {
           }}
         />
 
-        {/* Send Button */}
         <button
           onClick={handleSend}
           disabled={isSending || (!text.trim() && !imagePreview)}
           className="w-11 h-11 rounded-xl 
-          bg-charcoal dark:bg-[#f0f0ee] 
-          text-panel dark:text-charcoal 
-          flex items-center justify-center 
-          disabled:opacity-30 hover:opacity-80 
-          transition-all duration-200 shrink-0"
+            bg-charcoal dark:bg-[#f0f0ee] 
+            text-panel dark:text-charcoal 
+            flex items-center justify-center 
+            disabled:opacity-30 hover:opacity-80 
+            transition-all duration-200 shrink-0"
           aria-label="Send message"
         >
           {isSending ? (

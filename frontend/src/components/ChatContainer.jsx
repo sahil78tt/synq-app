@@ -59,6 +59,30 @@ const Message = memo(function Message({
   );
 });
 
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-2.5 px-2 py-1.5">
+      <div className="flex gap-1">
+        <span
+          className="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400 animate-bounce"
+          style={{ animationDelay: "0ms", animationDuration: "0.6s" }}
+        />
+        <span
+          className="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400 animate-bounce"
+          style={{ animationDelay: "150ms", animationDuration: "0.6s" }}
+        />
+        <span
+          className="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400 animate-bounce"
+          style={{ animationDelay: "300ms", animationDuration: "0.6s" }}
+        />
+      </div>
+      <span className="text-sm text-gray-900 dark:text-gray-300 italic">
+        typing...
+      </span>
+    </div>
+  );
+}
+
 export default function ChatContainer() {
   const {
     messages,
@@ -68,10 +92,13 @@ export default function ChatContainer() {
     searchResults,
     searchQuery,
     isSearching,
+    isTyping,
+    typingUserId,
   } = useChatStore();
 
   const { authUser } = useAuthStore();
   const bottomRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (!selectedChat) return;
@@ -88,12 +115,68 @@ export default function ChatContainer() {
   }, [selectedChat, addMessage]);
 
   useEffect(() => {
+    const handleTyping = ({ senderId }) => {
+      const state = useChatStore.getState();
+      const currentSelectedChat = state.selectedChat;
+
+      if (currentSelectedChat && senderId === currentSelectedChat._id) {
+        useChatStore.getState().setTyping(senderId);
+
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          useChatStore.getState().clearTyping();
+        }, 3000);
+      }
+    };
+
+    const handleStopTyping = ({ senderId }) => {
+      const state = useChatStore.getState();
+
+      if (
+        state.selectedChat &&
+        senderId === state.selectedChat._id &&
+        state.typingUserId === senderId
+      ) {
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        useChatStore.getState().clearTyping();
+      }
+    };
+
+    socket.on("typing", handleTyping);
+    socket.on("stopTyping", handleStopTyping);
+
+    return () => {
+      socket.off("typing", handleTyping);
+      socket.off("stopTyping", handleStopTyping);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    useChatStore.getState().clearTyping();
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+  }, [selectedChat?._id]);
+
+  useEffect(() => {
     if (bottomRef.current && !searchQuery) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, searchQuery]);
+  }, [messages, searchQuery, isTyping]);
 
   const hasSearchResults = searchResults && searchResults.length > 0;
+  const showTypingIndicator =
+    isTyping &&
+    typingUserId &&
+    selectedChat &&
+    typingUserId === selectedChat._id;
 
   return (
     <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-surface dark:bg-surface-dark">
@@ -101,7 +184,6 @@ export default function ChatContainer() {
 
       <ConversationSummary />
 
-      {/* Search Results Section */}
       {searchQuery && (
         <div className="px-5 py-3 border-b border-border dark:border-border-dark bg-accent/5 dark:bg-accent/10">
           <div className="flex items-center gap-2 mb-2">
@@ -154,7 +236,6 @@ export default function ChatContainer() {
         </div>
       )}
 
-      {/* Regular Messages Section */}
       <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
         {isLoadingMessages ? (
           <MessageSkeleton />
@@ -176,6 +257,9 @@ export default function ChatContainer() {
             />
           ))
         )}
+
+        {showTypingIndicator && <TypingIndicator />}
+
         <div ref={bottomRef} />
       </div>
 

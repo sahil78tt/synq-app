@@ -16,6 +16,18 @@ export const useChatStore = create((set, get) => ({
   searchResults: [],
   isSearching: false,
 
+  // Typing indicator state
+  isTyping: false,
+  typingUserId: null,
+
+  setTyping: (userId) => {
+    set({ isTyping: true, typingUserId: userId });
+  },
+
+  clearTyping: () => {
+    set({ isTyping: false, typingUserId: null });
+  },
+
   setSelectedChat: async (chat) => {
     set({
       selectedChat: chat,
@@ -23,6 +35,8 @@ export const useChatStore = create((set, get) => ({
       summary: null,
       searchQuery: "",
       searchResults: [],
+      isTyping: false,
+      typingUserId: null,
     });
     if (chat) {
       await get().fetchMessages(chat._id);
