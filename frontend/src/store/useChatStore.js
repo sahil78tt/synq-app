@@ -20,12 +20,56 @@ export const useChatStore = create((set, get) => ({
   isTyping: false,
   typingUserId: null,
 
+  // Delete modal state
+  isDeleteModalOpen: false,
+  deleteForBoth: false,
+  isDeleting: false,
+
   setTyping: (userId) => {
     set({ isTyping: true, typingUserId: userId });
   },
 
   clearTyping: () => {
     set({ isTyping: false, typingUserId: null });
+  },
+
+  // Delete modal actions
+  openDeleteModal: () => {
+    set({ isDeleteModalOpen: true, deleteForBoth: false });
+  },
+
+  closeDeleteModal: () => {
+    set({ isDeleteModalOpen: false, deleteForBoth: false });
+  },
+
+  setDeleteForBoth: (value) => {
+    set({ deleteForBoth: value });
+  },
+
+  clearChat: async () => {
+    const { selectedChat, deleteForBoth } = get();
+    if (!selectedChat) return;
+
+    try {
+      set({ isDeleting: true });
+
+      await axiosInstance.delete(`/message/clear/${selectedChat._id}`, {
+        data: { deleteForBoth },
+      });
+
+      set({
+        messages: [],
+        summary: null,
+        searchResults: [],
+        searchQuery: "",
+        isDeleteModalOpen: false,
+        deleteForBoth: false,
+        isDeleting: false,
+      });
+    } catch (error) {
+      console.error("Error clearing chat:", error);
+      set({ isDeleting: false });
+    }
   },
 
   setSelectedChat: async (chat) => {
@@ -37,6 +81,8 @@ export const useChatStore = create((set, get) => ({
       searchResults: [],
       isTyping: false,
       typingUserId: null,
+      isDeleteModalOpen: false,
+      deleteForBoth: false,
     });
     if (chat) {
       await get().fetchMessages(chat._id);

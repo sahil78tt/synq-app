@@ -6,6 +6,7 @@ import {
   sendMessage,
   summarizeConversation,
   semanticSearchMessages,
+  clearChat,
 } from "../controllers/message.controllers.js";
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get("/messages/:id", isAuthorized, getMessages);
 router.post("/messages/send/:id", isAuthorized, sendMessage);
 router.post("/summarize/:id", isAuthorized, summarizeConversation);
 router.get("/semantic-search/:id", isAuthorized, semanticSearchMessages);
+router.delete("/clear/:id", isAuthorized, clearChat);
 
 export default router;

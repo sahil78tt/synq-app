@@ -313,3 +313,32 @@ export const semanticSearchMessages = async (req, res) => {
     res.status(500).json({ message: "Failed to search messages" });
   }
 };
+
+export const clearChat = async (req, res) => {
+  try {
+    const { id: otherUserId } = req.params;
+    const myId = req.user._id;
+    const { deleteForBoth } = req.body;
+
+    if (deleteForBoth) {
+      // Delete all messages between both users
+      await Message.deleteMany({
+        $or: [
+          { senderId: myId, receiverId: otherUserId },
+          { senderId: otherUserId, receiverId: myId },
+        ],
+      });
+    } else {
+      // Delete only messages sent by the current user
+      await Message.deleteMany({
+        senderId: myId,
+        receiverId: otherUserId,
+      });
+    }
+
+    res.status(200).json({ message: "Chat cleared successfully" });
+  } catch (error) {
+    console.log("Error in clearChat:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
