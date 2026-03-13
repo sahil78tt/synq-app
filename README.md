@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-A modern full-stack chat application featuring real-time messaging, AI conversation summarization, and semantic search powered by embeddings.
+A modern full-stack chat application featuring real-time messaging, AI conversation summarization, semantic search powered by embeddings, and secure authentication with Google OAuth.
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@ A modern full-stack chat application featuring real-time messaging, AI conversat
 <a href="#demo">Demo</a> •
 <a href="#installation">Installation</a> •
 <a href="#tech-stack">Tech Stack</a> •
-<a href="#api-reference">API</a> 
+<a href="#api-reference">API</a>
 </p>
 
 <p align="center">
@@ -26,12 +26,13 @@ A modern full-stack chat application featuring real-time messaging, AI conversat
 <img src="https://img.shields.io/badge/MongoDB-6.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
 <img src="https://img.shields.io/badge/Socket.io-4.0-010101?style=for-the-badge&logo=socket.io&logoColor=white" />
 <img src="https://img.shields.io/badge/TailwindCSS-3.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+<img src="https://img.shields.io/badge/Google_OAuth-Authentication-4285F4?style=for-the-badge&logo=google&logoColor=white" />
 </p>
 
 ---
 
 <p align="center">
-<img src="./frontend/public/screenshots/synq-login.png" alt="SYNQ Screenshot" width="800" />
+<img src="./frontend/public/screenshots/synq-login-page.png" alt="SYNQ Screenshot" width="800" />
 </p>
 
 ---
@@ -105,7 +106,7 @@ Clean dark theme with smooth UI.
 
 ### Secure Authentication
 
-JWT authentication with bcrypt hashing.
+JWT authentication with bcrypt hashing and Google OAuth login.
 
 </td>
 <td>
@@ -125,7 +126,9 @@ Optimized for desktop and mobile.
 <p align="center">
 <img src="./frontend/public/screenshots/ai-summary.png" width="100%">
 </p>
-<br></br>
+
+<br/>
+
 <p align="center">
 <img src="./frontend/public/screenshots/semantic-search.png" width="100%">
 </p>
@@ -134,14 +137,16 @@ Optimized for desktop and mobile.
 
 # Demo
 
-Live demo
+Coming Soon...
+
+<!-- Live demo
 
 https://synq-app.vercel.app
 
 <p align="center">
 <img src="./assets/demo-light.png" width="45%">
 <img src="./assets/demo-dark.png" width="45%">
-</p>
+</p> -->
 
 ---
 
@@ -150,6 +155,7 @@ https://synq-app.vercel.app
 ### Frontend
 
 ```
+
 React 18
 Vite
 TailwindCSS
@@ -157,11 +163,13 @@ Zustand
 Socket.io Client
 Axios
 React Router
+
 ```
 
 ### Backend
 
 ```
+
 Node.js
 Express
 MongoDB
@@ -169,15 +177,20 @@ Mongoose
 Socket.io
 JWT
 bcrypt
+Google OAuth
+google-auth-library
 Cloudinary
+
 ```
 
 ### AI Layer
 
 ```
+
 Groq API
 Text Embeddings
 Cosine Similarity
+
 ```
 
 ---
@@ -185,36 +198,38 @@ Cosine Similarity
 # Project Structure
 
 ```
+
 synq/
 │
 ├── backend/
-│   └── src/
-│       ├── configs/
-│       │   ├── connectdb.js
-│       │   ├── socket.js
-│       │   ├── cloudinary.js
-│       │   └── embeddings.js
-│       │
-│       ├── controllers/
-│       ├── middlewares/
-│       ├── models/
-│       ├── routes/
-│       │   ├── auth.routes.js
-│       │   └── message.routes.js
-│       │
-│       └── server.js
+│ └── src/
+│ ├── configs/
+│ │ ├── connectdb.js
+│ │ ├── socket.js
+│ │ ├── cloudinary.js
+│ │ └── embeddings.js
+│ │
+│ ├── controllers/
+│ ├── middlewares/
+│ ├── models/
+│ ├── routes/
+│ │ ├── auth.routes.js
+│ │ └── message.routes.js
+│ │
+│ └── server.js
 │
 ├── frontend/
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── store/
-│       ├── context/
-│       ├── lib/
-│       ├── App.jsx
-│       └── main.jsx
+│ └── src/
+│ ├── components/
+│ ├── pages/
+│ ├── store/
+│ ├── context/
+│ ├── lib/
+│ ├── App.jsx
+│ └── main.jsx
 │
 └── README.md
+
 ```
 
 ---
@@ -226,7 +241,9 @@ synq/
 Generate summaries for long chats.
 
 ```
+
 POST /api/message/summarize/:userId
+
 ```
 
 Example response
@@ -266,13 +283,14 @@ Example response
 
 ### Authentication
 
-| Method | Endpoint                 | Description    |
-| ------ | ------------------------ | -------------- |
-| POST   | /api/auth/signup         | Create account |
-| POST   | /api/auth/login          | Login          |
-| POST   | /api/auth/logout         | Logout         |
-| GET    | /api/auth/me             | Current user   |
-| PUT    | /api/auth/update-profile | Update profile |
+| Method | Endpoint                 | Description         |
+| ------ | ------------------------ | ------------------- |
+| POST   | /api/auth/signup         | Create account      |
+| POST   | /api/auth/login          | Login               |
+| POST   | /api/auth/google         | Google login/signup |
+| POST   | /api/auth/logout         | Logout              |
+| GET    | /api/auth/me             | Current user        |
+| PUT    | /api/auth/update-profile | Update profile      |
 
 ### Messaging
 
@@ -325,7 +343,7 @@ npm run dev
 Create `.env` in `backend`
 
 ```
-# Sever Configs
+# Server Config
 PORT=5000
 
 # CURRENT ENVIRONMENT
@@ -346,8 +364,11 @@ CLOUDINARY_CLOUD_NAME=your_cloud
 CLOUDINARY_API_KEY=your_key
 CLOUDINARY_API_SECRET=your_secret
 
-# API KEY
+# AI API KEY
 GROQ_API_KEY=your_groq_key
+
+# GOOGLE AUTH
+GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
 ---
@@ -395,8 +416,6 @@ Future
 # License
 
 MIT License
-
----
 
 <p align="center">
 © 2026 Sahil Vishwakarma
