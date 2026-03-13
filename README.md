@@ -31,7 +31,7 @@ A modern full-stack chat application featuring real-time messaging, AI conversat
 ---
 
 <p align="center">
-<img src="./frontend/public/screenshots/synq.png" alt="SYNQ Screenshot" width="800" />
+<img src="./frontend/public/screenshots/synq-login.png" alt="SYNQ Screenshot" width="800" />
 </p>
 
 ---
