@@ -48,6 +48,26 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  googleLogin: async (googleUserInfo) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const { data } = await axiosInstance.post("/auth/google", googleUserInfo);
+
+      localStorage.setItem("synq_token", data.token);
+
+      set({ authUser: data.user, isLoading: false });
+
+      connectSocket(data.user._id);
+
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || "Google login failed.";
+      set({ isLoading: false, error: message });
+      return { success: false, message };
+    }
+  },
+
   signup: async (payload) => {
     set({ isLoading: true, error: null });
 

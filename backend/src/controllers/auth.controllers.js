@@ -33,6 +33,7 @@ export const signup = async (req, res) => {
       email,
       password: hashedpass,
       fullName,
+      provider: "email",
     });
 
     const token = generateToken(newUser._id);
@@ -61,6 +62,13 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Check if user is a Google user trying to login with password
+    if (user.provider === "google") {
+      return res.status(400).json({
+        message: "This account uses Google login. Please sign in with Google.",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -80,6 +88,55 @@ export const login = async (req, res) => {
   } catch (error) {
     console.log("Login Error:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const googleAuth = async (req, res) => {
+  const { email, name, picture, googleId } = req.body;
+
+  try {
+    if (!email || !googleId) {
+      return res.status(400).json({ message: "Invalid Google credentials" });
+    }
+
+    // Find existing user
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // User exists - update Google info if needed
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.provider = "google";
+        if (!user.profilePic && picture) {
+          user.profilePic = picture;
+        }
+        await user.save();
+      }
+    } else {
+      // Create new user
+      user = await User.create({
+        email,
+        fullName: name,
+        profilePic: picture || "",
+        provider: "google",
+        googleId,
+      });
+    }
+
+    const token = generateToken(user._id);
+
+    res.status(200).json({
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profilePic: user.profilePic,
+      },
+      token,
+    });
+  } catch (error) {
+    console.log("Google Auth Error:", error);
+    res.status(500).json({ message: "Google authentication failed" });
   }
 };
 

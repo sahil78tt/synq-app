@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.provider === "email";
+      },
       minlength: 6,
     },
     fullName: {
@@ -19,6 +21,15 @@ const userSchema = new mongoose.Schema(
     profilePic: {
       type: String,
       default: "",
+    },
+    provider: {
+      type: String,
+      enum: ["email", "google"],
+      default: "email",
+    },
+    googleId: {
+      type: String,
+      sparse: true,
     },
   },
   {

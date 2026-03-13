@@ -6,6 +6,7 @@ import {
   logout,
   updateProfile,
   checkAuth,
+  googleAuth,
 } from "../controllers/auth.controllers.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 router.post("/login", login);
 router.post("/signup", signup);
 router.post("/logout", logout);
+router.post("/google", googleAuth);
 
 // Protected routes
 router.get("/me", isAuthorized, checkAuth);
