@@ -31,7 +31,7 @@ A modern full-stack chat application featuring real-time messaging, AI conversat
 ---
 
 <p align="center">
-<img src="./frontend//public/screenshots/SynQ.png" alt="SYNQ Screenshot" width="800" />
+<img src="./frontend/public/screenshots/synq.png" alt="SYNQ Screenshot" width="800" />
 </p>
 
 ---
@@ -123,11 +123,11 @@ Optimized for desktop and mobile.
 # Screenshots
 
 <p align="center">
-<img src="./frontend/public/screenshots/AI Summary.png" width="100%">
+<img src="./frontend/public/screenshots/ai-summary.png" width="100%">
 </p>
 <br></br>
 <p align="center">
-<img src="./frontend/public/screenshots/Semantic Search.png" width="100%">
+<img src="./frontend/public/screenshots/semantic-search.png" width="100%">
 </p>
 
 ---
@@ -325,19 +325,28 @@ npm run dev
 Create `.env` in `backend`
 
 ```
+# Sever Configs
 PORT=5000
+
+# CURRENT ENVIRONMENT
 NODE_ENV=development
 
+# MONGODB CONFIG
 MONGO_URI=mongodb://localhost:27017/synq
 
+# JWT SECRETS
 JWT_SECRET=your_secret
+JWT_EXPIRY=your_expiry
 
+# CORS CONFIG
 CORS_ORIGIN=http://localhost:5173
 
+# CLOUDINARY SECRETS
 CLOUDINARY_CLOUD_NAME=your_cloud
 CLOUDINARY_API_KEY=your_key
 CLOUDINARY_API_SECRET=your_secret
 
+# API KEY
 GROQ_API_KEY=your_groq_key
 ```
 
