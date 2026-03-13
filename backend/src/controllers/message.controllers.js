@@ -321,7 +321,6 @@ export const clearChat = async (req, res) => {
     const { deleteForBoth } = req.body;
 
     if (deleteForBoth) {
-      // Delete all messages between both users
       await Message.deleteMany({
         $or: [
           { senderId: myId, receiverId: otherUserId },
@@ -329,7 +328,6 @@ export const clearChat = async (req, res) => {
         ],
       });
     } else {
-      // Delete only messages sent by the current user
       await Message.deleteMany({
         senderId: myId,
         receiverId: otherUserId,

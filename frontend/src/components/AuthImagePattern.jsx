@@ -12,20 +12,30 @@ export default function AuthImagePattern({ title, subtitle }) {
       />
 
       {/* Content */}
-      <div className="relative z-10 max-w-sm text-center">
+      <div className="relative z-10 max-w-sm text-center ">
+        <div className="flex justify-center mb-6 mt-18 ">
+          <img
+            src="/SynQ-Logo.png"
+            alt="SynQ Logo"
+            className="w-80 h-80  object-contain"
+          />
+        </div>
         <div className="mb-10 flex justify-center gap-2.5 flex-wrap">
           {[...Array(9)].map((_, i) => (
             <div
               key={i}
               className="w-10 h-10 rounded-xl border border-border dark:border-border-dark bg-panel dark:bg-panel-dark shadow-soft"
-              style={{ opacity: 0.4 + (i * 0.07) % 0.6 }}
+              style={{ opacity: 0.4 + ((i * 0.07) % 0.6) }}
             />
           ))}
         </div>
 
+        {/* Logo */}
+
         <h2 className="font-display text-2xl text-charcoal dark:text-[#f0f0ee] mb-3 leading-snug">
           {title}
         </h2>
+
         <p className="text-sm text-muted dark:text-muted-dark leading-relaxed">
           {subtitle}
         </p>

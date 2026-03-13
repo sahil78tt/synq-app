@@ -74,7 +74,9 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p className="text-xs text-rose-500 dark:text-rose-400">{error}</p>
+              <p className="text-xs text-rose-500 dark:text-rose-400">
+                {error}
+              </p>
             )}
 
             <button

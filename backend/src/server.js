@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import express from "express";
-
 import authroutes from "./routes/auth.routes.js";
 import messageroutes from "./routes/message.routes.js";
 import ConnectDB from "./configs/connectdb.js";
@@ -20,10 +19,8 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use("/api/auth", authroutes);
 app.use("/api/message", messageroutes);
 
-//  server
-server.listen(process.env.PORT || 5000, () => {
-  console.log(
-    `🚀 Server running on http://localhost:${process.env.PORT || 5000}`,
-  );
+// server
+server.listen(process.env.PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
   ConnectDB();
 });
