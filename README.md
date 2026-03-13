@@ -399,5 +399,5 @@ MIT License
 ---
 
 <p align="center">
-Built with ❤️ by Sahil Vishwakarma
+© 2026 Sahil Vishwakarma
 </p>
