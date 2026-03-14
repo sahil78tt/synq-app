@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import express from "express";
+
 import authroutes from "./routes/auth.routes.js";
 import messageroutes from "./routes/message.routes.js";
 import ConnectDB from "./configs/connectdb.js";
@@ -10,23 +11,20 @@ import { app, server } from "./configs/socket.js";
 dotenv.config();
 
 // Allowed origins
-const allowedOrigins = [
-  process.env.CORS_ORIGIN, // production frontend (Vercel)
-  "http://localhost:5173", // local development
-];
+const allowedOrigins = ["http://localhost:5173", process.env.CORS_ORIGIN];
 
-// Middlewares
+// CORS middleware
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
+    origin: (origin, callback) => {
+      // allow Postman / server-to-server requests
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
+        return callback(null, true);
       }
+
+      return callback(new Error("CORS not allowed"));
     },
     credentials: true,
   }),

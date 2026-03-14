@@ -5,9 +5,15 @@ import express from "express";
 const app = express();
 const server = http.createServer(app);
 
+// Allowed origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://synq-app-rose.vercel.app",
+];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN,
+    origin: allowedOrigins,
     credentials: true,
   },
 });
@@ -31,9 +37,10 @@ io.on("connection", (socket) => {
     userSocketMap[userId] = socket.id;
   }
 
+  // send online users
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  // Typing indicator events
+  // Typing indicator
   socket.on("typing", ({ senderId, receiverId }) => {
     const receiverSocketId = userSocketMap[receiverId];
     if (receiverSocketId) {

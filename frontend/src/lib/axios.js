@@ -2,6 +2,7 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "https://synq-app-wqk6.onrender.com/api",
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
