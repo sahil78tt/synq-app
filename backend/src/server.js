@@ -13,11 +13,20 @@ dotenv.config();
 // Allowed origins
 const allowedOrigins = ["http://localhost:5173", process.env.CORS_ORIGIN];
 
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "SynQ API is running",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // CORS middleware
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow Postman / server-to-server requests
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
