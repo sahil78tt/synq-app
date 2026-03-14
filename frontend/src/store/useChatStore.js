@@ -25,6 +25,10 @@ export const useChatStore = create((set, get) => ({
   deleteForBoth: false,
   isDeleting: false,
 
+  // ✅ NEW: Rate limit state for summarization
+  summaryError: null, // { message: string, retryAfter: number, isRateLimited: boolean }
+  rateLimitResetTime: null, // Timestamp when rate limit resets
+
   setTyping: (userId) => {
     set({ isTyping: true, typingUserId: userId });
   },
@@ -83,6 +87,8 @@ export const useChatStore = create((set, get) => ({
       typingUserId: null,
       isDeleteModalOpen: false,
       deleteForBoth: false,
+      // ✅ Clear summary error when switching chats
+      summaryError: null,
     });
     if (chat) {
       await get().fetchMessages(chat._id);
@@ -164,19 +170,82 @@ export const useChatStore = create((set, get) => ({
     set({ onlineUsers: users });
   },
 
+  // ✅ UPDATED: fetchSummary with rate limit handling
   fetchSummary: async () => {
-    const { selectedChat } = get();
+    const { selectedChat, rateLimitResetTime } = get();
     if (!selectedChat) return;
 
+    // Check if still rate limited
+    if (rateLimitResetTime && Date.now() < rateLimitResetTime) {
+      const secondsLeft = Math.ceil((rateLimitResetTime - Date.now()) / 1000);
+      const minutesLeft = Math.ceil(secondsLeft / 60);
+      set({
+        summaryError: {
+          message: `Rate limit active. Please wait ${minutesLeft} minute${minutesLeft !== 1 ? "s" : ""}.`,
+          retryAfter: secondsLeft,
+          isRateLimited: true,
+        },
+      });
+      return;
+    }
+
     try {
-      set({ isSummarizing: true });
+      set({ isSummarizing: true, summaryError: null });
       const { data } = await axiosInstance.post(
         `/message/summarize/${selectedChat._id}`,
       );
-      set({ summary: data.summary, isSummarizing: false });
+      set({
+        summary: data.summary,
+        isSummarizing: false,
+        summaryError: null,
+        rateLimitResetTime: null,
+      });
     } catch (error) {
-      set({ isSummarizing: false, summary: null });
+      // ✅ Handle 429 Rate Limit Error
+      if (error.response?.status === 429) {
+        const errorData = error.response.data;
+        const retryAfter = errorData.retryAfter || 900; // Default 15 minutes
+        const resetTime = Date.now() + retryAfter * 1000;
+
+        set({
+          isSummarizing: false,
+          summary: null,
+          summaryError: {
+            message:
+              errorData.message ||
+              "Rate limit exceeded. Please try again later.",
+            retryAfter: retryAfter,
+            isRateLimited: true,
+            limit: errorData.limit || 5,
+            windowMinutes: errorData.windowMinutes || 15,
+          },
+          rateLimitResetTime: resetTime,
+        });
+      } else {
+        // Handle other errors
+        set({
+          isSummarizing: false,
+          summary: null,
+          summaryError: {
+            message:
+              error.response?.data?.message ||
+              "Failed to generate summary. Please try again.",
+            isRateLimited: false,
+          },
+        });
+      }
     }
+  },
+
+  // ✅ NEW: Clear summary error
+  clearSummaryError: () => {
+    set({ summaryError: null });
+  },
+
+  // ✅ NEW: Check if currently rate limited
+  isRateLimited: () => {
+    const { rateLimitResetTime } = get();
+    return rateLimitResetTime && Date.now() < rateLimitResetTime;
   },
 
   setSearchQuery: (query) => {

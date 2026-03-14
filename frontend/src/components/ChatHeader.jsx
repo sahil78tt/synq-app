@@ -14,6 +14,9 @@ export default function ChatHeader() {
     setSearchQuery,
     clearSearch,
     openDeleteModal,
+    // ✅ NEW: Rate limit state
+    summaryError,
+    rateLimitResetTime,
   } = useChatStore();
 
   const [showSearch, setShowSearch] = useState(false);
@@ -21,6 +24,26 @@ export default function ChatHeader() {
   const [localSearch, setLocalSearch] = useState("");
   const menuRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  // ✅ NEW: Track if currently rate limited
+  const [isRateLimited, setIsRateLimited] = useState(false);
+
+  // ✅ NEW: Check rate limit status
+  useEffect(() => {
+    if (!rateLimitResetTime) {
+      setIsRateLimited(false);
+      return;
+    }
+
+    const checkRateLimit = () => {
+      setIsRateLimited(Date.now() < rateLimitResetTime);
+    };
+
+    checkRateLimit();
+    const interval = setInterval(checkRateLimit, 1000);
+
+    return () => clearInterval(interval);
+  }, [rateLimitResetTime]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -76,9 +99,19 @@ export default function ChatHeader() {
     setShowMenu(false);
   };
 
+  // ✅ NEW: Check if summarize button should be disabled
+  const isSummarizeDisabled = isSummarizing || isRateLimited;
+
+  // ✅ NEW: Get button text based on state
+  const getSummarizeButtonText = () => {
+    if (isSummarizing) return "Summarizing...";
+    if (isRateLimited) return "Rate Limited";
+    return "Summarize";
+  };
+
   return (
     <header className="h-14 bg-panel dark:bg-panel-dark border-b border-border dark:border-border-dark flex items-center justify-between px-4 gap-3 shrink-0">
-      {/* ✅ Left section: Back button + User info */}
+      {/* Left section: Back button + User info */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Back button - only visible on mobile (< md) */}
         <button
@@ -124,7 +157,7 @@ export default function ChatHeader() {
         </div>
       </div>
 
-      {/* ✅ Right section: Action buttons - MUST have shrink-0 */}
+      {/* Right section: Action buttons */}
       <div className="flex items-center gap-1 shrink-0">
         {/* Search Section */}
         {showSearch ? (
@@ -205,17 +238,47 @@ export default function ChatHeader() {
               </svg>
             </button>
 
-            {/* Summarize Button */}
+            {/* ✅ UPDATED: Summarize Button with rate limit visual feedback */}
             <button
               onClick={handleSummarize}
-              disabled={isSummarizing}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-accent bg-accent/10 hover:bg-accent/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSummarizeDisabled}
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-colors
+                ${
+                  isRateLimited
+                    ? "text-amber-600 dark:text-amber-400 bg-amber-500/10 cursor-not-allowed"
+                    : "text-accent bg-accent/10 hover:bg-accent/20"
+                }
+                ${isSummarizeDisabled ? "opacity-60 cursor-not-allowed" : ""}
+              `}
               aria-label="Summarize conversation"
+              title={
+                isRateLimited
+                  ? "Rate limit reached. Please wait."
+                  : "Summarize conversation"
+              }
             >
               {isSummarizing ? (
                 <>
                   <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
                   <span>Summarizing...</span>
+                </>
+              ) : isRateLimited ? (
+                <>
+                  {/* Rate limited icon */}
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Rate Limited</span>
                 </>
               ) : (
                 <>
@@ -262,26 +325,53 @@ export default function ChatHeader() {
               {/* Dropdown Menu */}
               {showMenu && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-panel dark:bg-panel-dark border border-border dark:border-border-dark rounded-xl shadow-card overflow-hidden z-50">
-                  {/* Summarize option for mobile */}
+                  {/* ✅ UPDATED: Summarize option for mobile with rate limit support */}
                   <button
                     onClick={handleSummarize}
-                    disabled={isSummarizing}
-                    className="sm:hidden w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-charcoal dark:text-[#f0f0ee] hover:bg-surface dark:hover:bg-surface-dark/50 transition-colors disabled:opacity-50"
+                    disabled={isSummarizeDisabled}
+                    className={`sm:hidden w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
+                      ${
+                        isRateLimited
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-charcoal dark:text-[#f0f0ee]"
+                      }
+                      ${
+                        isSummarizeDisabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-surface dark:hover:bg-surface-dark/50"
+                      }
+                    `}
                   >
-                    <svg
-                      className="w-4 h-4 text-muted"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    {isSummarizing ? "Summarizing..." : "Summarize"}
+                    {isRateLimited ? (
+                      <svg
+                        className="w-4 h-4 text-amber-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-4 h-4 text-muted"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    )}
+                    {getSummarizeButtonText()}
                   </button>
 
                   <div className="sm:hidden h-px bg-border dark:bg-border-dark mx-3" />
