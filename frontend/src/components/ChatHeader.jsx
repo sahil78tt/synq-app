@@ -105,7 +105,7 @@ export default function ChatHeader() {
   // ✅ NEW: Get button text based on state
   const getSummarizeButtonText = () => {
     if (isSummarizing) return "Summarizing...";
-    if (isRateLimited) return "Rate Limited";
+    if (isRateLimited) return "Limit Reached";
     return "Summarize";
   };
 
@@ -278,7 +278,7 @@ export default function ChatHeader() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span>Rate Limited</span>
+                  <span>Limit Reached</span>
                 </>
               ) : (
                 <>
