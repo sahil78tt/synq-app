@@ -1,7 +1,7 @@
 import { useEffect, useState, memo } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { getInitials, truncate } from "../lib/utils";
+import { truncate } from "../lib/utils";
 import { DEFAULT_AVATAR } from "../constants";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 
@@ -27,7 +27,6 @@ const ConversationItem = memo(function ConversationItem({
           className="w-9 h-9 rounded-full object-cover border border-border dark:border-border-dark"
         />
 
-        {/* ONLINE DOT */}
         {user.isOnline && (
           <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-panel dark:border-panel-dark" />
         )}
@@ -71,7 +70,10 @@ export default function Sidebar() {
     fetchConversations();
   }, []);
 
-  const filtered = conversations
+  // ✅ Ensure conversations is always an array
+  const safeConversations = Array.isArray(conversations) ? conversations : [];
+
+  const filtered = safeConversations
     .map((user) => ({
       ...user,
       isOnline: onlineUsers.includes(user._id),
