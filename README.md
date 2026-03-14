@@ -27,6 +27,7 @@ A modern full-stack chat application featuring real-time messaging, AI conversat
 <img src="https://img.shields.io/badge/Socket.io-4.0-010101?style=for-the-badge&logo=socket.io&logoColor=white" />
 <img src="https://img.shields.io/badge/TailwindCSS-3.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
 <img src="https://img.shields.io/badge/Google_OAuth-Authentication-4285F4?style=for-the-badge&logo=google&logoColor=white" />
+<img src="https://img.shields.io/badge/Live-Demo-000000?style=for-the-badge&logo=vercel&logoColor=white" />
 </p>
 
 ---
@@ -42,7 +43,7 @@ A modern full-stack chat application featuring real-time messaging, AI conversat
 Traditional chat apps let you send messages. **SYNQ** focuses on understanding conversations.
 
 - Lost in long chats? Generate AI summaries instantly
-- Can't find a message? Search by meaning
+- Can't find a message? Search by meaning using semantic embeddings
 - Need live updates? Real-time messaging with typing indicators
 
 ---
@@ -137,16 +138,11 @@ Optimized for desktop and mobile.
 
 # Demo
 
-Coming Soon...
+Live Application
 
-<!-- Live demo
+https://synq-app-rose.vercel.app
 
-https://synq-app.vercel.app
-
-<p align="center">
-<img src="./assets/demo-light.png" width="45%">
-<img src="./assets/demo-dark.png" width="45%">
-</p> -->
+You can create an account or login with Google to test the application.
 
 ---
 
@@ -155,7 +151,6 @@ https://synq-app.vercel.app
 ### Frontend
 
 ```
-
 React 18
 Vite
 TailwindCSS
@@ -163,13 +158,11 @@ Zustand
 Socket.io Client
 Axios
 React Router
-
 ```
 
 ### Backend
 
 ```
-
 Node.js
 Express
 MongoDB
@@ -180,17 +173,34 @@ bcrypt
 Google OAuth
 google-auth-library
 Cloudinary
-
 ```
 
 ### AI Layer
 
 ```
-
 Groq API
 Text Embeddings
 Cosine Similarity
+```
 
+---
+
+# Architecture
+
+```
+Frontend (React + Vite)
+      │
+      │ REST API + WebSockets
+      ▼
+Backend (Node.js + Express + Socket.io)
+      │
+      ▼
+MongoDB Atlas
+
+External Services
+- Cloudinary (image storage)
+- Groq API (AI summarization)
+- Google OAuth (authentication)
 ```
 
 ---
@@ -198,38 +208,36 @@ Cosine Similarity
 # Project Structure
 
 ```
-
 synq/
 │
 ├── backend/
-│ └── src/
-│ ├── configs/
-│ │ ├── connectdb.js
-│ │ ├── socket.js
-│ │ ├── cloudinary.js
-│ │ └── embeddings.js
-│ │
-│ ├── controllers/
-│ ├── middlewares/
-│ ├── models/
-│ ├── routes/
-│ │ ├── auth.routes.js
-│ │ └── message.routes.js
-│ │
-│ └── server.js
+│   └── src/
+│       ├── configs/
+│       │   ├── connectdb.js
+│       │   ├── socket.js
+│       │   ├── cloudinary.js
+│       │   └── embeddings.js
+│       │
+│       ├── controllers/
+│       ├── middlewares/
+│       ├── models/
+│       ├── routes/
+│       │   ├── auth.routes.js
+│       │   └── message.routes.js
+│       │
+│       └── server.js
 │
 ├── frontend/
-│ └── src/
-│ ├── components/
-│ ├── pages/
-│ ├── store/
-│ ├── context/
-│ ├── lib/
-│ ├── App.jsx
-│ └── main.jsx
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── store/
+│       ├── context/
+│       ├── lib/
+│       ├── App.jsx
+│       └── main.jsx
 │
 └── README.md
-
 ```
 
 ---
@@ -241,9 +249,7 @@ synq/
 Generate summaries for long chats.
 
 ```
-
 POST /api/message/summarize/:userId
-
 ```
 
 Example response
@@ -338,6 +344,31 @@ npm run dev
 
 ---
 
+# Deployment
+
+The application is deployed using modern cloud platforms.
+
+Frontend  
+Hosted on Vercel  
+https://synq-app-rose.vercel.app
+
+Backend  
+Hosted on Render  
+https://synq-app-wqk6.onrender.com
+
+Database  
+MongoDB Atlas
+
+Image Storage  
+Cloudinary
+
+AI Processing  
+Groq API
+
+Environment variables must be configured in the hosting platform dashboards.
+
+---
+
 # Environment Variables
 
 Create `.env` in `backend`
@@ -350,14 +381,14 @@ PORT=5000
 NODE_ENV=development
 
 # MONGODB CONFIG
-MONGO_URI=mongodb://localhost:27017/synq
+MONGO_URI=your_mongodb_atlas_connection_string
 
 # JWT SECRETS
 JWT_SECRET=your_secret
 JWT_EXPIRY=your_expiry
 
 # CORS CONFIG
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=http://localhost:5173,https://synq-app-rose.vercel.app
 
 # CLOUDINARY SECRETS
 CLOUDINARY_CLOUD_NAME=your_cloud
@@ -396,6 +427,8 @@ GOOGLE_CLIENT_ID=your_google_client_id
 
 # Roadmap
 
+Completed
+
 - Real-time messaging
 - AI summarization
 - Semantic search
@@ -404,7 +437,7 @@ GOOGLE_CLIENT_ID=your_google_client_id
 - Image sharing
 - Dark mode
 
-Future
+Future Improvements
 
 - Group chats
 - Voice messages
