@@ -12,13 +12,25 @@ export default function HomePage() {
       <Navbar />
 
       <div className="flex flex-1 min-h-0">
-        {/* Sidebar: hidden on mobile when chat is selected */}
-        <div className={`${selectedChat ? "hidden sm:flex" : "flex"} h-full`}>
+        {/* ✅ CHANGED: Sidebar - full width on mobile, hidden when chat selected on mobile */}
+        <div
+          className={`
+            ${selectedChat ? "hidden" : "flex"} 
+            md:flex 
+            w-full md:w-auto 
+            h-full
+          `}
+        >
           <Sidebar />
         </div>
 
-        {/* Main area */}
-        <div className={`flex-1 min-w-0 flex flex-col ${!selectedChat && "hidden sm:flex"}`}>
+        {/* ✅ CHANGED: Chat area - hidden on mobile when no chat, full width when chat selected */}
+        <div
+          className={`
+            flex-1 min-w-0 flex flex-col 
+            ${!selectedChat ? "hidden md:flex" : "flex"}
+          `}
+        >
           {selectedChat ? <ChatContainer /> : <NoChatSelected />}
         </div>
       </div>

@@ -70,7 +70,6 @@ export default function Sidebar() {
     fetchConversations();
   }, []);
 
-  // ✅ Ensure conversations is always an array
   const safeConversations = Array.isArray(conversations) ? conversations : [];
 
   const filtered = safeConversations
@@ -85,7 +84,8 @@ export default function Sidebar() {
     );
 
   return (
-    <aside className="w-[280px] lg:w-[300px] h-full bg-panel dark:bg-panel-dark border-r border-border dark:border-border-dark flex flex-col shrink-0">
+    // ✅ CHANGED: Added w-full for mobile, md:w-[280px] for tablet+
+    <aside className="w-full md:w-[280px] lg:w-[300px] h-full bg-panel dark:bg-panel-dark border-r border-border dark:border-border-dark flex flex-col md:shrink-0">
       <div className="px-4 pt-5 pb-3">
         <h2 className="font-display text-sm text-charcoal dark:text-[#f0f0ee] mb-3">
           Messages
