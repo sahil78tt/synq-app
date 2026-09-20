@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 
 // Load .env from backend root
 const envPath = join(__dirname, "../../.env");
-dotenv.config({ path: envPath });
+dotenv.config({ path: envPath, quiet: true });
 
 async function generateEmbeddingsForExistingMessages() {
   try {

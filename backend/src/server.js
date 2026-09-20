@@ -8,7 +8,7 @@ import messageroutes from "./routes/message.routes.js";
 import ConnectDB from "./configs/connectdb.js";
 import { app, server } from "./configs/socket.js";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 // Allowed origins
 const allowedOrigins = ["http://localhost:5173", process.env.CORS_ORIGIN];

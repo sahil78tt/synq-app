@@ -1,9 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import { config } from "dotenv";
 
-config();
-
-console.log(process.env.CLOUDINARY_CLOUD_NAME);
+config({ quiet: true });
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
