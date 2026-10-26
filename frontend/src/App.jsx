@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import LandingPage from "./pages/LandingPage";
 import { socket } from "./lib/socket";
 import { useChatStore } from "./store/useChatStore";
 
@@ -40,6 +41,21 @@ function GuestRoute({ children }) {
   return !authUser ? children : <Navigate to="/" replace />;
 }
 
+function RootRoute() {
+  const authUser = useAuthStore((state) => state.authUser);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-surface dark:bg-surface-dark">
+        <div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  return authUser ? <HomePage /> : <LandingPage />;
+}
+
 export default function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const theme = useThemeStore((state) => state.theme);
@@ -66,14 +82,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<RootRoute />} />
         <Route
           path="/login"
           element={
